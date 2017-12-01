@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> 
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+    <title>{{ escape(main_title) }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dc.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.min.css') }}">	
+    <script type="text/javascript" src="{{ static_url('js/jquery-2.1.4.min.js') }}"></script>
+	<script type="text/javascript" src="{{ static_url('js/d3.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/crossfilter.min.js') }}"></script>   
+    <script type="text/javascript" src="{{ static_url('js/dc.min.js') }}"></script>  
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>	
+</head>
+
+<style type="text/css">
+<!-- Style code goes here -->
+</style>
+
+<body>
+
+    <div>
+    {% block content %}
+    {% end block %}
+    </div>
+	
+	<!-- Footer -->
+	<!-- ****** -->
+	<br></br>
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted credit">Site was created by <a href="http://www.hedaro.com" target="_blank">HEDARO</a> using <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> and <a href="http://www.tornadoweb.org/" target="_blank">Tornado</a>.</p>
+      </div>
+    </div> 		
+
+</body>
+</html>

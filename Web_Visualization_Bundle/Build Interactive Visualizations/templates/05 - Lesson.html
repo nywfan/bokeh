@@ -1,0 +1,86 @@
+{% extends "template.html" %}
+{% block content %}
+
+
+	
+<!-- anchor div for data table -->
+<table class="table table-hover dc-data-table" id="data-table">
+    <thead>
+        <tr class='header'>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Legs</th>
+            <th>HP</th>
+         </tr>
+    </thead>
+</table>
+
+
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var DataTable = dc.dataTable("#data-table");
+
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+
+// Create function
+function Graph(data) {
+		
+   
+    // Feed it through crossfilter   
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//define a dimension
+	//Here we will group by hp
+	dim = ndx.dimension(function(d) {return d.type});
+
+
+/* Create a data table widget and use the given css selector as anchor. You can also specify
+ * an optional chart group for this chart to be scoped within. When a chart belongs
+ * to a specific group then any interaction with such chart will only trigger redraw
+ * on other charts within the same chart group. */
+DataTable.dimension(dim)
+		// data table does not use crossfilter group but rather a closure
+		// as a grouping function
+	    .group(function(d) {
+			return 'This is a nice table';
+		})
+		// (optional) max number of records to be shown, :default = 25
+		.size(10)
+		// dynamic columns creation using an array of closures
+		.columns([
+			function(d) { return d.name; },
+			function(d) { return d.type; },
+			function(d) { return d.legs; },
+			function(d) { return d.hp; }
+		])
+		// (optional) sort using the given field, :default = function(d){return d;}
+		.sortBy(function(d){ return d.hp; })
+		// (optional) sort order, :default ascending
+		.order(d3.ascending);
+
+			
+
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

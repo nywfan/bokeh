@@ -1,0 +1,241 @@
+{% extends "template.html" %}
+{% block content %}
+
+<div class="picture">
+<div class="container">
+
+<br>
+</br>
+
+	<!-- HEADING -->
+	<div style="font-size:50px;font-family:Open Sans"><center>This month's <font color="steelblue">reader experts<font></center></div>
+	<br></br>
+	
+	<!-- D3.js stuff goes here-->
+	<div class="row">
+	  <div id="score" class="col-xs-12 center-block"></div>
+	</div>	
+	
+</div>	
+</div>	
+	
+<script type="text/javascript">
+
+	// Create Global Variables
+	var dataset;
+
+	// Load csv file
+	d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+	
+		dataset = data;
+
+		// Call function
+		Graph(dataset);
+		
+	});	
+
+	// svg variables
+	var w = 1000,
+		h = 400;
+		
+	// hackish way to alternate div locations	
+	var flip = 1;	
+	
+	// color scheme
+	var color = d3.scale.category10();	
+
+	// create svg inside div
+	var svg = d3.select("#score")
+					  .append("svg")
+					  .attr("id","haha")
+					  
+					  // these two lines make the svg responsive
+					  .attr("viewBox", "0 0 " + w + " " + h )
+					  .attr("preserveAspectRatio", "none");
+		
+    // MARKER STUFF		
+	var defs = svg.append('svg:defs')
+	
+	// four different marker styles
+    var data = [
+					{ id: 0, name: 'circle', path: 'M 0, 0  m -5, 0  a 5,5 0 1,0 10,0  a 5,5 0 1,0 -10,0', viewbox: '-6 -6 12 12' },
+					{ id: 1, name: 'square', path: 'M 0,0 m -5,-5 L 5,-5 L 5,5 L -5,5 Z', viewbox: '-5 -5 10 10' },
+					{ id: 2, name: 'arrow', path: 'M 0,0 m -5,-5 L 5,0 L -5,5 Z', viewbox: '-5 -5 10 10' },
+					{ id: 2, name: 'stub', path: 'M 0,0 m -1,-5 L 1,-5 L 1,5 L -1,5 Z', viewbox: '-1 -5 2 10' }
+				];
+				
+	// style markers
+	var marker = defs.selectAll('marker')
+					 .data(data)
+					 .enter()
+					 .append('svg:marker')
+					 .attr('id', function(d){ return 'marker_' + d.name})
+					 .attr('markerHeight', 5)
+					 .attr('markerWidth', 5)
+					 .attr('markerUnits', 'strokeWidth')
+					 .attr('orient', 'auto')
+					 .attr('refX', 0)
+					 .attr('refY', 0)
+					 .attr('viewBox', function(d){ return d.viewbox })
+					 .append('svg:path')
+					 .attr('d', function(d){ return d.path })
+					 .attr('fill', "black");		
+
+	// add group
+	svg = svg.append("g")
+			 .attr("transform", "translate(" + w/2 + ",10)");
+		
+	// font size scale
+	// we have to change the font size as the user changes the browser window
+	var fscale = d3.scale.linear()
+                   .domain([0, w])
+                   .range([50, 25]);
+				
+	
+	function Graph(pool) {
+	
+		// add text
+		var text = svg.selectAll("text")
+					  .data(pool)
+					  .enter()
+					  .append("text")
+					  .attr("x", 0)
+					  .attr("y", function (i, d) { return 25 + d*h/pool.length; })
+					  .attr("text-anchor", "middle")
+					  .style("font-size", '20px')
+					  .attr("font-family", "Open Sans")
+					  .attr('fill', function(d,i) { return color(i)}) // use color scheme
+					  .text(function (d) { return d.cat; });
+						
+					  
+		// Define 'div' for tooltips
+		// we create and hide the div prior to use
+		var div = d3.select("body")
+					.append("div")  // declare the tooltip div 
+					.attr("class", "tooltip")              // apply the 'tooltip' class
+					.style("opacity", 0)                  // set the opacity to nil	
+					.style("top", "150px") // make sure div is out of the way
+					.style("left", "0px"); // make sure div is out of the way									
+								
+		var line = text.on("mouseover", function(d) {      
+
+
+						div.transition()
+							.duration(500)    
+							.style("opacity", 0);
+						div.transition()
+							.duration(300)    
+							.style("opacity", .9);
+						div.html(
+							'<br></br>' + 
+							'<a href= "' + d.link + '">' + // The first <a> tag
+							'<font color="black"><strong>Hello world</strong></font>' +
+							"</a>" +                          // closing </a> tag
+							"<br>"  + "<p>First Name: " + d.first +
+							"<br>" + "Last Name: " + d.last + "</p>")  
+							.style("font-family", "Open Sans")
+							.style("font-size", "20px")
+							
+							// location of div
+							.style("left", function () {
+
+												if ( flip > 0 ) {
+														flip = flip*-1;
+														return (d3.event.pageX - 600) + "px"  
+
+												} else {
+														flip = flip*-1;
+														return (d3.event.pageX + 350) + "px"
+												};
+											}	
+							)
+							.style("top", (d3.event.pageY - 40) + "px")
+							.style('background', d3.select(this).attr("fill")); // make the background the same color as the text
+
+						// remove old marker
+						svg.selectAll("path").remove();
+						
+						// logic to place marker next to text
+						if ( flip < 0 ) {
+							//The data for our line
+							var lineData = [ { "x": +d3.select(this).attr("x") - this.getComputedTextLength()/2 - 50,   "y": +d3.select(this).attr("y") - 10},  { "x": +d3.select(this).attr("x") - this.getComputedTextLength()/2 - 150,  "y": +d3.select(this).attr("y") - 10}];
+
+
+						} else {
+							//The data for our line
+							var lineData = [ { "x": +d3.select(this).attr("x") + this.getComputedTextLength()/2 + 50,   "y": +d3.select(this).attr("y") - 10},  { "x": +d3.select(this).attr("x") + this.getComputedTextLength()/2 + 150,  "y": +d3.select(this).attr("y") - 10}];
+
+						};							
+						
+						 
+						var lineFunction = d3.svg.line()
+												  .x(function(d) { return d.x; })
+												  .y(function(d) { return d.y; })
+												 .interpolate("linear");
+					 
+						// turn on marker
+						marker.transition()
+							.duration(500)    
+							.style("opacity", 1);	
+
+
+						// draw the marker
+						var lineGraph = svg.selectAll("path")
+													.data([1]) // dummy one element array used to only append "one" marker
+													.enter()
+													.append("path")
+													.attr("d", lineFunction(lineData))
+													.attr("stroke", "black")
+													.attr("stroke-width", 2)
+													.attr("fill", "none")
+													.attr('marker-start', "url(#marker_circle)")
+													.attr('marker-end', "url(#marker_arrow)");
+													
+						
+						
+						
+						
+						
+						});			
+
+
+			// on window resize
+			$(window).on('load', function(){
+				$(window).resize(function(){
+
+					// change font size
+					text.style("font-size", fscale(parseInt(d3.select("#haha").style("width"))) + 'px');
+
+					// hide div
+					div.transition()
+						.duration(500)    
+						.style("opacity", 0);		
+
+					// hide marker
+					marker.transition()
+						.duration(500)    
+						.style("opacity", 0);	
+
+					// hide line
+					svg.selectAll("path").transition()
+						.duration(500)    
+						.style("opacity", 0);	
+
+				});
+			});							
+
+
+	}; // end function
+
+
+
+	
+	
+</script>	
+	
+	
+
+{% end block %}
+
+
+

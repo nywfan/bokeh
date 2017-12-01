@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<head>
+    <title>{{ escape(main_title) }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dc.min.css') }}"/>	
+    <link href="{{ static_url('css/bootstrap.min.css') }}" rel="stylesheet">
+    <script type="text/javascript" src="{{ static_url('js/jquery-3.1.1.min.js') }}"></script>  	
+	<script type="text/javascript" src="{{ static_url('js/d3.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/crossfilter.min.js') }}"></script>   
+    <script type="text/javascript" src="{{ static_url('js/dc.min.js') }}"></script>  
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>  	
+</head>
+
+<style>
+
+#retro h1 {
+	font-family:  'Hoefler Text', Georgia, 'Times New Roman', serif;
+	font-weight: normal;
+        font-size: 1.75em;
+	letter-spacing: .2em;
+	line-height: 1.1em;
+	margin:0px;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+</style>
+
+<body>
+
+    <div class="container">
+    {% block title %}
+		<center><h2>{{ escape(page_title) }}</h2></center>
+		<br>
+    {% end block %}
+    </div>
+
+    <div class="container">
+    {% block content %}
+    {% end block %}
+    </div>
+
+</body>
+</html>

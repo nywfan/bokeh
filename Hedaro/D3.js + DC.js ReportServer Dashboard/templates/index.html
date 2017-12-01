@@ -1,0 +1,240 @@
+{% extends "template.html" %}
+{% block content %}
+
+<br></br>
+
+<div class="container">
+	<!-- TITLE -->
+	<div style="font-size:45px"><strong><center>ReportServer Dashboard</center></strong></div>
+
+	<!-- HORIZONTAL SPACING -->
+	<hr>
+</div>
+
+<div class="container">	
+<br></br>
+
+	<!-- ********************************* -->
+	<!-- ////////  STATUS CODES   //////// -->
+	<!-- ********************************* -->	
+	
+	<!-- A div anchor that can be identified by id -->
+	<div id="rowchart" class="dc-chart" style="width: 50%;">
+		<!-- Title or anything you want to add above the chart -->
+		<strong>Status Codes</strong>
+		<!--
+			This will create a reset button when ever the user selects a filter.
+			Clicking on the reset button will remove all filters.
+		 -->
+		<a class="reset" href="javascript:RowChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+		<div class="clearfix"></div>
+		<!--
+			dc.js will also automatically inject applied current filter value into
+			any html element with css class set to "filter"
+		-->
+		<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+		<br>
+		</br>
+	</div>    
+
+	<!-- ********************************* -->
+	<!-- ////////  DATE FILTER   ///////// -->
+	<!-- ********************************* -->	
+
+	<!-- A div anchor that can be identified by id -->
+	<div id="barchart" class="dc-chart" style="width: 100%;">
+
+		<!-- Title or anything you want to add above the chart -->
+		<strong>Start Times</strong>
+		<!--
+			This will create a reset button when ever the user selects a filter.
+			Clicking on the reset button will remove all filters.
+		 -->
+		<a class="reset" href="javascript:void(0);" onclick="javascript:BarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+		<div class="clearfix"></div>
+		<!--
+			dc.js will also automatically inject applied current filter value into
+			any html element with css class set to "filter"
+		-->
+		<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+		<br>
+		</br>
+	</div>  
+
+	<!-- ********************************* -->
+	<!-- ////////     TABLE      ///////// -->
+	<!-- ********************************* -->	
+
+	<!-- anchor div for data table -->
+	<table class="table table-hover dc-data-table" id="data-table">
+		<thead>
+			<tr class='header'>
+				<th>Name</th>
+				<th>Status</th>
+				<th>Start Time</th>
+				<th>User Name</th>			
+			 </tr>
+		</thead>
+	</table>
+
+
+</div> <!-- close div container -->
+
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var DataTable = dc.dataTable("#data-table");
+        var BarChart = dc.barChart("#barchart");	
+		var RowChart = dc.rowChart("#rowchart");
+		var LongDate = d3.time.format("%m/%d/%Y %H:%M:%S");
+		var ShortDate = d3.time.format("%m/%d/%Y");		
+			
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			// Format dates
+            data.forEach(function (e) {
+				// for testing
+			    //console.log(new Date(e.TimeStart));
+                e.date = new Date(e.TimeStart);
+				
+				// ShortDate converts column into s string
+			    // We need to then convert the string back into a date
+				e.date2 = new Date(ShortDate(e.date));
+            });		
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});			
+			
+
+		
+
+// Create function
+function Graph(data) {
+		
+    // Feed it through crossfilter   
+	var ndx = crossfilter(data);
+	
+	// for testing
+	//console.log(data);
+	
+	//define a dimension
+	//Here we will group by the Status column
+	var dim = ndx.dimension(function(d) {return d.date2});
+
+	// define a group
+	var g = dim.group()	
+	
+	// Create plot ranges
+	var xrange = new d3.extent(data, function(d) { return d.date2; });
+	var PlotRange = [d3.time.day.offset(xrange[0], -1), d3.time.day.offset(xrange[1], 1)];	
+	
+	// variables
+	var w = 1000,
+		h = 100;		
+	
+	//Lets create a filter widget
+	BarChart.width(w)
+            .height(h)
+            .margins({ top: 10, right: 50, bottom: 30, left: 60 })
+            .dimension(dim)
+            .group(g)
+            .centerBar(true)
+			.xUnits(d3.time.days)
+			.round(d3.time.days.round)
+            .x(d3.time.scale().domain(PlotRange))
+			.y(d3.scale.linear().domain([0,g.top(1)[0].value]).range([0,100]))
+			.elasticY(true)
+            .renderHorizontalGridLines(true);	
+    
+    // must be done in a new line
+    // limit the number of ticks
+    BarChart.yAxis().ticks(4);        	
+	
+	BarChart.on("postRender", function (chart) {	
+	
+		// This makes the chart responsive
+		// make sure to apply style="width:100%;" to surrounding div
+		chart.select("svg")
+			.attr("viewBox", "0 0 " + w + " " + h)
+			.attr("preserveAspectRatio", "xMinYMin")
+			.attr("width", "100%")
+			.attr("height", "100%");
+							
+		chart.redraw();
+				
+	});		
+
+	// variables
+	var w2 = 600,
+		h2 = 300;
+	
+	var dim2 = ndx.dimension(function(d) {return d.Status});
+	var g2 = dim2.group();		
+			
+	//Lets create a row chart
+	RowChart.dimension(dim2)
+	    	.group(g2)
+		    .width(w2)
+			.height(h2)
+			.x(d3.scale.linear().domain([0,ndx.size()]).range([0,600]))
+			.elasticX(true)
+			.labelOffsetX(10);
+			
+	RowChart.on("postRender", function (chart) {	
+	
+		// This makes the chart responsive
+		// make sure to apply style="width:100%;" to surrounding div
+		chart.select("svg")
+			.attr("viewBox", "0 0 " + w2 + " " + h2)
+			.attr("preserveAspectRatio", "xMinYMin")
+			.attr("width", "100%")
+			.attr("height", "100%");
+							
+		chart.redraw();
+				
+	});			
+
+			
+	/* Create a data table widget and use the given css selector as anchor. You can also specify
+	 * an optional chart group for this chart to be scoped within. When a chart belongs
+	 * to a specific group then any interaction with such chart will only trigger redraw
+	 * on other charts within the same chart group. */
+	DataTable.dimension(dim)
+			// data table does not use crossfilter group but rather a closure
+			// as a grouping function
+			.group(function(d) {
+				return '';
+			})
+			// (optional) max number of records to be shown, :default = 25
+			.size(100)
+			// dynamic columns creation using an array of closures
+			.columns([
+				function(d) { return d.RptName; },
+				function(d) { return d.Status; },
+				function(d) { return LongDate(d.date); },
+				function(d) { return d.UserName; }			
+			])
+			// (optional) sort using the given field, :default = function(d){return d;}
+			.sortBy(function(d){ return d.date; })
+			// (optional) sort order, :default ascending
+			.order(d3.descending);			   
+			   
+
+	dc.renderAll();
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

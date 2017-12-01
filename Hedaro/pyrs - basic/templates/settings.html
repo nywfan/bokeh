@@ -1,0 +1,86 @@
+{% extends "template.html" %}
+{% block content %}
+
+<div class="container">
+
+<!-- Alternate error messages -->
+<div class="error_box alert alert-danger" id = "error" style="display: none;">
+</div>
+
+<br>
+</br>
+
+
+<form class="form-horizontal" name = "ezform" role="form" action="{% raw action %}" method="post">
+{% raw xsrf_form_html() %}
+
+	<!-- Settings Panel -->
+	<div class="panel panel-default">
+	  <div class="panel-heading" style="font-size:25px"><strong>Application Settings</strong></div>
+	  <div class="panel-body">
+
+	  
+	<!-- REPO LOCATION -->
+	  <div class="form-group">
+		<label for="repo" class="col-sm-2 control-label">File Location of Repository</label>
+		<div class="col-sm-5">
+		  <input type="text" class="form-control" name="repo" placeholder="i.e. c:/notebooks" title="Please enter full path" required>
+		</div>
+	  </div>
+
+	  <div class="form-group">
+		<div class="col-sm-offset-10 col-sm-12">
+		  <button type="submit" class="btn btn-default">Apply Changes</button>
+		</div>
+	  </div>
+
+	   </div> <!-- end body -->
+	   <div class="panel-footer danger" style="font-size:15px"><strong>Current repository:</strong> {% raw repo %}</div>   
+	</div> <!-- end panel --> 
+  
+
+</form> <!-- end form -->
+</div> <!-- end container -->
+
+
+<script type="text/javascript">
+
+
+	new FormValidator('ezform', [
+	{
+		name: 'repo',
+		display: 'Report URL or file location',    
+		rules: 'required'
+	}], function(errors, evt) {
+
+		/*
+		 * DO NOT COPY AND PASTE THIS CALLBACK. THIS IS CONFIGURED TO WORK ON THE DOCUMENTATION PAGE ONLY.
+		 * YOU MUST CUSTOMIZE YOUR CALLBACK TO WORK UNDER YOUR ENVIRONMENT.
+		 */
+
+		var SELECTOR_ERRORS = $('.error_box');
+			
+		if (errors.length > 0) {
+			SELECTOR_ERRORS.empty();
+			
+			for (var i = 0, errorLength = errors.length; i < errorLength; i++) {
+				SELECTOR_ERRORS.append(errors[i].message + '<br />');
+			}
+			
+			SELECTOR_ERRORS.fadeIn(200);
+			document.getElementById('error').scrollIntoView();
+		} else {
+			SELECTOR_ERRORS.css({ display: 'none' });
+		}
+
+	});
+
+
+</script>
+
+
+	
+{% end block %}
+
+	
+

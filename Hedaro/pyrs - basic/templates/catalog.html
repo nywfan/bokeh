@@ -1,0 +1,175 @@
+{% extends "template.html" %}
+
+
+{% block content %}
+
+        {% raw tbl %} 
+
+		
+<script type="text/javascript">
+
+	$(document).ready(function() {
+
+		// add id to table	
+		$("table.dataframe").prop('id', 'example');	
+	    
+		// initialize datatable	
+		$('#example').dataTable({});	 
+			 
+    });
+		
+	// run and commit notebook on repo
+	function nbupdate(baseurl, nburl, nbname, btn){
+
+	// testing
+	//console.log(baseurl, nburl, nbname, btn);
+
+	// create json object
+	var data = {'burl':baseurl , 'nburl':nburl , 'fn':nbname };
+
+	// disable button
+	$(btn).prop("disabled",true);
+
+	// let user know python is working...
+	$(btn).text("working...")
+
+	// update nb
+	$.post('/nbupdate', data)
+		.fail( function (){ 
+					// update button text
+					$(btn).text("Update ");
+					$(btn).append('<i class="glyphicon glyphicon-remove"></i>');				
+					
+			})
+		.done( function (){ 
+					// update button text
+					$(btn).text("Update ");
+					$(btn).append('<i class="glyphicon glyphicon-ok"></i>');	
+			})
+		.always( function (){ 
+					// update button text				
+					$(btn).prop("disabled",false); 
+			});
+
+	}
+	
+/*	
+	
+function add_nbname(nbname, baseurl){
+
+	// add notebook name to form	
+	$('#uname')[0].value = nbname;
+	
+	// add notebook url
+	$('#nburl')[0].value = baseurl;	
+}	
+
+	
+function clear_values(){
+	//clear values on exit
+		$("#ufreq")[0].value='';
+		$("#uday")[0].value='';
+		$("#utime")[0].value='';
+		$("#uampm")[0].value='';
+		$("#uname")[0].value='';
+		$("#nburl")[0].value='';		
+        $("#modal_delete").text("Delete");	
+        $("#modal_save").text("Save changes");			
+}
+
+function get_values(){
+	//the object to pass back to the server
+	return values={ 'new_data':{'userfreq':$("#ufreq")[0].value
+			,'userday':$("#uday")[0].value
+			,'usertime':$("#utime")[0].value
+			,'userampm':$("#uampm")[0].value
+			,'username':$("#uname")[0].value
+			,'nburl':$("#nburl")[0].value}};
+}
+
+function submit(btn){
+	var values = get_values();
+
+	// for testing
+	//console.log(values);
+	
+	var ck_day = /^[1-9]{1,2}$/;
+	var ck_time = /^[1-9]{1,2}$/;
+	
+	if( values.new_data.userfreq !="" 
+			&& values.new_data.usertime !="" 
+			&& ck_time.test(values.new_data.usertime)
+			&& parseInt(values.new_data.usertime) <= 12
+			&& values.new_data.userampm !="" 
+			&& (values.new_data.userday == "" || parseInt(values.new_data.userday) <= 31)
+			&& (values.new_data.userday == "" || ck_day.test(values.new_data.userday)) ){
+	
+		// disable button
+		$(btn).prop("disabled",true);
+
+		// let user know python is working...
+		$(btn).text("working...")		
+	
+		var submit_data= JSON.stringify(values);
+		$.post('/schcreate',submit_data)
+			.fail( function (){ 
+						// update button text
+						$(btn).text("Save changes ");
+						$(btn).append('<i class="glyphicon glyphicon-remove"></i>');				
+						
+				})		
+			.done( function (){ 
+						// update button text
+						$(btn).text("Save changes ");
+						$(btn).append('<i class="glyphicon glyphicon-ok"></i>');	
+				})		
+			.always( function (){ 
+						// update button text				
+						$(btn).prop("disabled",false); 
+				});						
+	}else{
+		window.alert("please enter valid values");
+	}
+	
+
+}
+
+function nb_remove(btn){
+	var values = get_values();
+
+	// for testing
+	//console.log(values);
+	
+	// disable button
+	$(btn).prop("disabled",true);
+
+	// let user know python is working...
+	$(btn).text("working...")	
+
+	var submit_data= JSON.stringify(values);
+	$.post('/schremove',submit_data)
+		.fail( function (){ 
+					// update button text
+					$(btn).text("Delete ");
+					$(btn).append('<i class="glyphicon glyphicon-remove"></i>');				
+					
+			})		
+		.done( function (){ 
+					// update button text
+					$(btn).text("Delete ");
+					$(btn).append('<i class="glyphicon glyphicon-ok"></i>');	
+			})		
+		.always( function (){ 
+					// update button text				
+					$(btn).prop("disabled",false); 
+			});
+
+}
+
+*/
+
+</script>
+
+{% end block %} 
+
+

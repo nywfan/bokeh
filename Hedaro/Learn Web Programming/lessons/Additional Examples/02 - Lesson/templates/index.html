@@ -1,0 +1,54 @@
+{% extends "template.html" %}
+{% block content %}
+
+<br>
+</br>
+
+<form class="form-horizontal" name = "form" role="form" action="http://localhost:8888/" method="post">
+
+
+<div class="panel panel-default">
+  <div class="panel-heading" style="font-size:25px"><strong>Personal Information</strong></div>
+  <div class="panel-body">
+
+<!-- FIRST NAME -->
+  <div class="form-group">
+    <label for="userfirstname" class="col-sm-2 control-label">
+		First Name 
+		<span class="glyphicon glyphicon-asterisk" style="color:red;font-size:100%;"></span> 
+	</label>
+    <div class="col-sm-5">
+      <input type="text" class="form-control" name="userfirstname" placeholder="i.e. John" title="at least two alpha characters" pattern="^[A-Za-z]{2,60}$" required>
+    </div>
+  </div>
+  
+<!-- LAST NAME -->  
+  <div class="form-group">
+    <label for="userlastname" class="col-sm-2 control-label">
+		Last Name 
+		<span class="glyphicon glyphicon-asterisk" style="color:red;font-size:100%;"></span> 
+	</label>
+    <div class="col-sm-5">
+      <input type="text" class="form-control" name="userlastname" placeholder="i.e. Doe" title="at least two alpha characters" pattern="^[A-Za-z]{2,60}$" required>
+    </div>
+  </div>  
+  
+<br>
+</br>
+<!-- SUBMIT BUTTON -->
+  <div class="form-group">
+    <div class="col-sm-offset-10 col-sm-12">
+      <button type="submit" class="btn btn-default">Submit Application</button>
+    </div>
+  </div>
+  
+<!-- end Personal Information -->
+  </div>
+</div>  
+
+
+
+<!-- end form -->
+</form>
+
+{% end block %}

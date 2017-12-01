@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<head>
+    <title>{{ escape(main_title) }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.min.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dc.min.css') }}"/>	
+	<script type="text/javascript" src="{{ static_url('js/jquery-3.1.1.min.js') }}"></script>
+	<script type="text/javascript" src="{{ static_url('js/d3.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/crossfilter.min.js') }}"></script>   
+    <script type="text/javascript" src="{{ static_url('js/dc.min.js') }}"></script>   
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
+</head>
+
+<style>
+.resize {
+    width: 100%;
+    
+}
+</style>
+
+<body>
+
+<!-- Adding this part centered everything on the screen nicely -->
+<div class="container">
+
+    <!-- These are the addresses -->
+	<div class="jumbotron">
+		<div class="row">
+			<div class="col-xs-4 col-xs-offset-1 col-sm-4 col-sm-offset-1 col-md-4 col-md-offset-1 col-lg-4 col-lg-offset-1">
+				<address>
+				  <p><strong>HEDARO</strong><br>
+				  111 Wonderful HWY<br>
+				  San Jose, CA 11111<br>
+				  <abbr title="Mobile">P:</abbr> (111) 111-1111</p>
+				</address>		
+			</div>
+			<div class="col-xs-4 col-xs-offset-2 col-sm-4 col-sm-offset-2 col-md-4 col-md-offset-3 col-lg-4 col-lg-offset-3">
+				<address>
+				  <p><strong>ABC, Inc.</strong><br>
+				  111 Great Ave<br>
+				  San Jose, CA 11111<br>
+				  <abbr title="Phone">P:</abbr> (111) 111-1111</p>
+				</address>	
+			</div>
+		</div>
+	</div>
+
+    <!-- This is the bill summary section -->
+	<!-- This is the datatable section -->	
+    <div>
+    {% block content %}
+    {% end block %}
+    </div>
+	
+	
+</div>	<!-- end container div -->
+	
+</body>
+</html>

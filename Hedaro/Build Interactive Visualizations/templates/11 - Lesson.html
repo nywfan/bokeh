@@ -1,0 +1,181 @@
+{% extends "template.html" %}
+
+<!-- ignore page title -->
+{% block title %}
+{% end block %}	
+
+{% block content %}
+
+<!-- FILTERS!!! -->
+<!-- *************************************** -->
+	<br>
+	<div class="col-md-12 text-center">
+	
+				<button type="button" class="btn btn-primary" onclick=filter1()>Human and Dog</button>
+				<button type="button" class="btn btn-primary" onclick=filter2()>Human</button>
+				<button type="button" class="btn btn-primary" onclick=filter3()>Dog</button>
+				<button type="button" class="btn btn-primary" onclick=filter4()>Bird</button>
+				<button type="button" class="btn btn-primary" onclick=filter5()>Food-Beast</button>
+
+			<hr>
+			<br></br>
+	</div>	
+
+
+<!-- CHARTS!!! -->
+<!-- *************************************** -->	
+<div class="row">
+
+	<!-- row chart -->
+	<div class="col-md-6 col-md-offset-1">
+	
+		<div id="rowchart" class="dc-chart">
+			<div id="retro">
+			<h1>Types</h1>
+			</div>	
+			
+			<center>
+			<div>			
+						<a class="reset" href="javascript:RowChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+						<div class="clearfix"></div>
+						<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+			</div>			
+			</center>			
+			
+			<br>
+			</br>
+		</div> 
+
+	</div> <!-- end row chart -->	
+	
+	<!-- pie chart -->	
+	<div class="col-md-4">
+		
+		<div id="piechart" class="dc-chart">
+			<div id="retro">
+			<h1>Names</h1>
+			</div>
+
+			<center>
+			<div>
+						
+						<a class="reset" href="javascript:PieChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+						<div class="clearfix"></div>
+						<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+
+			</div>			
+			</center>
+		
+			<br>
+			</br>
+		</div>
+		
+	</div> <!-- end pie chart -->		
+			
+</div> <!-- end class="row" -->
+
+
+<!-- RANDOM TEXT -->
+<!-- *************************************** -->
+<br>
+<br>
+<div id="retro">
+<h1>Quisque dapibus porta mi, eget laoreet massa suscipit id. Fusce fermentum nunc a lacus mattis, ut efficitur ipsum rhoncus. Donec massa turpis, lacinia ac commodo vel, placerat et metus. Nullam molestie, ex et lobortis mattis, arcu metus dignissim metus, in rutrum quam diam vitae dolor. Mauris pulvinar nec dolor sit amet sodales. Nullam vel neque ut enim ornare mattis. Nulla vel neque vulputate, commodo massa ut, egestas nulla. Nam imperdiet dolor libero, at iaculis orci condimentum quis.</h1>
+</div>	
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var RowChart = dc.rowChart("#rowchart");
+		var PieChart = dc.pieChart("#piechart");
+		
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+// Create function
+function Graph(data) {
+		
+   
+    // Make a crossfilter object  
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//define a dimension
+	//Here we will group by type
+	dim = ndx.dimension(function(d) {return d.type});
+	
+	//Here we group by type and sum on column legs
+	g = dim.group().reduceSum(function(d){return d.legs;});
+	
+	//Lets create a row chart
+	RowChart.dimension(dim)
+	    	.group(g)
+		    .width(500)
+			.elasticX(true);
+			
+	dim2 = ndx.dimension(function(d) {return d.name});	
+	g2 = dim2.group().reduceSum(function(d){return d.hp;});	
+	
+	//Lets create a pie chart
+	PieChart.dimension(dim2)
+			.radius(90)
+			.innerRadius(45)
+			.group(g2)
+			.title(function(d){ return d.data.key +": "+d.value;})
+			.renderTitle(true);
+
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function		
+
+
+
+
+
+// Custom filters on row chart
+function filter1() {
+
+	var a = ["human", "dog"];
+
+	a.forEach(function(item) {
+		// do something with `item`
+		RowChart.filter(item);		
+	});	
+	
+    dc.redrawAll();
+
+};	
+
+function filter2() {
+	RowChart.filter('human');
+    dc.redrawAll();
+};	
+function filter3() {
+	RowChart.filter('dog');
+    dc.redrawAll();
+};	
+function filter4() {
+	RowChart.filter('bird');
+    dc.redrawAll();
+};	
+function filter5() {
+	RowChart.filter('food-beast');
+    dc.redrawAll();
+};	
+	
+
+		
+    </script>
+	
+{% end block %}
+
+	
+

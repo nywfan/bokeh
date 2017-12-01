@@ -1,0 +1,176 @@
+{% extends "template.html" %}
+
+<!-- ignore page title -->
+{% block title %}
+{% end block %}	
+
+{% block content %}
+
+
+
+
+<!-- CHARTS!!! -->
+<!-- *************************************** -->
+<br>	
+<div class="row">
+
+	<!-- row chart -->
+	<div class="col-md-6 col-md-offset-1">
+	
+		<div id="rowchart" class="dc-chart">
+			<div id="retro">
+			<h1>Types</h1>
+			</div>	
+			
+			<center>
+			<div>			
+						<a class="reset" href="javascript:RowChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+						<div class="clearfix"></div>
+						<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+			</div>			
+			</center>			
+			
+			<br>
+			</br>
+		</div> 
+
+	</div> <!-- end row chart -->	
+	
+	<!-- pie chart -->	
+	<div class="col-md-4">
+		
+		<div id="piechart" class="dc-chart">
+			<div id="retro">
+			<h1>Names</h1>
+			</div>
+
+			<center>
+			<div>
+						
+						<a class="reset" href="javascript:PieChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+						<div class="clearfix"></div>
+						<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+
+			</div>			
+			</center>
+		
+			<br>
+			</br>
+		</div>
+		
+	</div> <!-- end pie chart -->		
+			
+</div> <!-- end class="row" -->
+
+
+<!-- FILTERS!!! -->
+<!-- *************************************** -->
+	<br>
+	<div class="col-md-12 text-center">
+	
+		<br>
+		<p><strong>Filter by Type</strong></p>
+		<input type="text" id="table-search" class="form-control"></input>	
+
+			<br></br>
+	</div>	
+
+
+<!-- RANDOM TEXT -->
+<!-- *************************************** -->
+<br>
+<br>
+<div id="retro">
+<h1>Quisque dapibus porta mi, eget laoreet massa suscipit id. Fusce fermentum nunc a lacus mattis, ut efficitur ipsum rhoncus. Donec massa turpis, lacinia ac commodo vel, placerat et metus. Nullam molestie, ex et lobortis mattis, arcu metus dignissim metus, in rutrum quam diam vitae dolor. Mauris pulvinar nec dolor sit amet sodales. Nullam vel neque ut enim ornare mattis. Nulla vel neque vulputate, commodo massa ut, egestas nulla. Nam imperdiet dolor libero, at iaculis orci condimentum quis.</h1>
+</div>	
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var types=[];
+		var RowChart = dc.rowChart("#rowchart");
+		var PieChart = dc.pieChart("#piechart");
+		
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+// Create function
+function Graph(data) {
+		
+   
+    // Make a crossfilter object  
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//define a dimension
+	//Here we will group by type
+	dim = ndx.dimension(function(d) {return d.type});
+	
+		// get all values in dim
+		var rawTypes = dim.top(Infinity);
+		
+		// push values to array
+		rawTypes.forEach(function (e) {
+			// append values to array
+			types.push(e.type);
+			// only get unique values
+			types = $.unique(types);
+		});		
+	
+	//Here we group by type and sum on column legs
+	g = dim.group().reduceSum(function(d){return d.legs;});
+	
+	//Lets create a row chart
+	RowChart.dimension(dim)
+	    	.group(g)
+		    .width(500)
+			.elasticX(true);
+			
+	dim2 = ndx.dimension(function(d) {return d.name});	
+	g2 = dim2.group().reduceSum(function(d){return d.hp;});	
+	
+	//Lets create a pie chart
+	PieChart.dimension(dim2)
+			.radius(90)
+			.innerRadius(45)
+			.group(g2)
+			.title(function(d){ return d.data.key +": "+d.value;})
+			.renderTitle(true);
+
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function		
+
+
+// custom filters
+ $("#table-search").on('input', function () {
+ 
+	// reset filter
+	RowChart.filterAll();
+
+	// only apply filter if input is not blank and a valid type
+	if (this.value != '' && types.indexOf(this.value) > -1) {
+		RowChart.filter(this.value);
+	};
+	
+	// redraw charts with new filter   
+	dc.redrawAll();	
+       
+ });
+	
+
+		
+    </script>
+	
+{% end block %}
+
+	
+

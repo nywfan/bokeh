@@ -1,0 +1,115 @@
+{% extends "template.html" %}
+{% block content %}
+
+<form class="form-horizontal" name = "ezform" role="form">
+{% raw xsrf_form_html() %}
+
+	<div class="panel panel-default">
+	  <div class="panel-heading" style="font-size:25px"><strong>Hint: Press the copy button to copy the table to your clipboard</strong></div>
+	  <div class="panel-body">
+
+	  <div class="form-group">
+		<label for="uans" class="col-sm-12 text-left">{{ qname }}</label>
+		<div class="col-sm-5">
+		  <input type="number" class="form-control" id="uans" name="uans" placeholder="i.e. number" title="no special characters" required>
+		</div>
+	  </div>
+
+	  <input type="hidden" class="form-control" id="useed" value="{{ seed }}">  
+	  <input type="hidden" class="form-control" id="uid" value="{{ id }}">    
+	  
+	<br>
+	</br>
+
+	  <div class="form-group">
+		<div class="col-sm-offset-10 col-sm-12">
+		  <button type="submit" class="btn btn-default" onclick="check_ans(this);">Submit Answer</button>
+	  
+		</div>
+	  </div>    
+	  
+	  </div>
+	</div>
+
+</form>         
+
+{% raw tbl %}
+		
+<script type="text/javascript">
+
+	
+	// initialize datatable
+	$(document).ready(function() {
+	
+		// add id to table	
+		$("table.dataframe").prop('id', 'example');	
+	
+		$('#example').dataTable( {
+				dom: 'T<"clear">lfrtip',
+				"tableTools": {
+					"sSwfPath": "static/data/copy_csv_xls_pdf.swf"
+				}
+	         } );
+			 
+			 
+        } );
+	
+
+	function get_values(){
+		//the object to pass back to the server
+		return values={ 'new_data':{'uans':$("#uans")[0].value,
+									'useed':$("#useed")[0].value,
+									'uid':$("#uid")[0].value}};
+	}
+
+	function check_ans(btn){
+		var values = get_values();
+
+		// for testing
+		//console.log(values);
+		
+		// disable button
+		$(btn).prop("disabled",true);
+
+		// let user know python is working...
+		$(btn).text("working...")	
+
+		var submit_data= JSON.stringify(values);
+		$.post('/',submit_data)
+			.fail( function (){ 
+						// update button text
+						$(btn).text("Error ");
+						$(btn).append('<i class="glyphicon glyphicon-remove"></i>');				
+						
+				})		
+			.done( function (data){ 
+						// update button text
+						$(btn).text("Submit Answer ");
+						obj = JSON.parse(data);
+						console.log(obj['result']);
+						
+						if (obj['result'] === true) {
+							$(btn).append('<i class="glyphicon glyphicon-ok"></i>');
+							window.alert("correct!");
+						}
+						else {
+							window.alert("incorrect!");
+							$(btn).append('<i class="glyphicon glyphicon-remove"></i>');
+						}	
+						
+				})		
+			.always( function (){ 
+						// update button text				
+						$(btn).prop("disabled",false); 
+				});
+
+	}
+
+
+
+
+</script>
+
+{% end block %} 
+
+

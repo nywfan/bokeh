@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<head>
+	<!-- lets the browser know that the page is using the UTF-8 character set -->
+    <meta charset="utf-8">
+	
+	<!-- This makes sure your web page is scaled correctly on mobile -->
+	<!-- width = Defines the viewport width
+         height = Defines the viewport height
+         initial-scale = Defines the initial zoom scale of the viewport (1.0 is no zoom)
+         user-scalable = Defines whether we will allow the user to zoom (no/yes)
+         minimum-scale = Defines the minimum zoom scale of the viewport (1.0 is no scale)
+         maximum-scale = Defines the maximum zoom scale of the viewport (1.0 is no scale) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> 
+	
+	<!-- This makes it possible to have your application appear in full screen making it look like a native app -->
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	
+	<!-- stuff from past lessons -->
+    <title>{{ escape(main_title) }}</title>
+	<script type="text/javascript" src="{{ static_url('js/jquery-2.0.3.min.js') }}"></script> <!-- bootstrap 3 requires jquery --> 
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>	
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.css') }}"/>
+</head>
+
+
+<body>
+
+<!-- Adding this part centers everything on the screen nicely -->
+<div class="container">
+
+    <!-- Heading code block -->
+    {% block heading %}
+		<div style="font-size:100px;"> 
+			<center>Forms</center> 
+		</div>
+		
+		<center><p>a simple toy example</p></center>
+    {% end block %}
+
+    <!-- Content code block -->
+    {% block content %}
+    {% end block %}
+	
+</div>	<!-- end container div -->
+	
+</body>
+</html>

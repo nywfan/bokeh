@@ -1,0 +1,145 @@
+{% extends "template.html" %}
+{% block content %}
+	
+
+<!-- A div anchor that can be identified by id -->
+<div id="bubblechart" class="dc-chart">
+    <!-- Title or anything you want to add above the chart -->
+    <strong>Bubble Chart</strong>
+    <!--
+        This will create a reset button when ever the user selects a filter.
+		Clicking on the reset button will remove all filters.
+     -->
+    <a class="reset" href="javascript:BubbleChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+    <!--
+        dc.js will also automatically inject applied current filter value into
+        any html element with css class set to "filter"
+    -->
+    <span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var BubbleChart = dc.bubbleChart("#bubblechart");
+
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			// Format columns
+            data.forEach(function (e) {
+				// convert from string to int
+                e.hp = +e.hp;
+                e.legs = +e.legs;
+            });	
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+
+// Create function
+function Graph(data) {
+		
+   
+    // Feed it through crossfilter   
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//define a dimension
+	//Here we will group by hp
+	dim = ndx.dimension(function(d) {return d.hp});
+
+	//Here we group by hp and do a bunch of stuff???
+	g = dim.group().reduce( 
+		//add
+		function(p,v) {
+			 ++p.count;
+			 p.sumIndex +=v.legs;
+			 p.avgIndex=p.sumIndex/p.count;
+			  return p;
+			},
+		//remove
+		function(p,v) {
+			--p.count; 
+			 p.sumIndex -=v.legs;
+			 p.avgIndex=p.sumIndex/p.count;
+			return p;
+			},
+		//init
+		function() {
+			return {count:0, sumIndex:0, 
+				avgIndex:0 };
+		}
+
+			);
+			
+	// max and min values		
+	var dmax = d3.max(g.all(), function(d) { return d.value.sumIndex; }); 
+	var dmin = d3.min(g.all(), function(d) { return d.value.sumIndex; }); 	
+
+	//Lets create a bubble chart
+	BubbleChart.dimension(dim)
+			   .width(500) // (optional) define chart width, :default = 200
+			   .height(200) // (optional) define chart height, :default = 200
+			   .group(g)
+			   
+				//##### Accessors
+				//Accessor functions are applied to each value returned by the grouping
+				//
+				//* `.colorAccessor` The returned value will be mapped to an internal scale to determine a fill color
+				//* `.keyAccessor` Identifies the `X` value that will be applied against the `.x()` to identify pixel location
+				//* `.valueAccessor` Identifies the `Y` value that will be applied agains the `.y()` to identify pixel location
+				//* `.radiusValueAccessor` Identifies the value that will be applied agains the `.r()` determine radius size,
+				//*     by default this maps linearly to [0,100]
+		
+			   .keyAccessor(function (p) { return p.value.sumIndex; }) // x value			   
+			   .valueAccessor(function(p) {return p.value.sumIndex;}) // y value
+			   .radiusValueAccessor(function(p) {return p.value.count;}) // radius
+			   .x(d3.scale.linear().domain([dmin,dmax]).range([0,100]))
+			   .y(d3.scale.linear().domain([dmin,dmax]).range([0,100]))
+			   .r(d3.scale.linear().domain([0, dmax*2]))
+			   .title(function (p) {
+					
+					return [
+						   "count: " + p.value.count,
+						   "sumIndex: " + p.value.sumIndex,
+						   "avgIndex: " + p.value.avgIndex,
+						   ]
+						   .join("\n");
+				})
+			   .renderTitle(true)
+			   
+				//##### Elastic Scaling
+				//`.elasticX` and `.elasticX` determine whether the chart should rescale each axis to fit data.
+				//The `.yAxisPadding` and `.xAxisPadding` add padding to data above and below their max values in the same unit
+				//domains as the Accessors.
+			   .elasticY(true)
+			   .elasticX(true)
+			   .yAxisPadding(2)
+			   .xAxisPadding(2)			
+			   .xAxisLabel('xAxisLabel') // (optional) render an axis label below the x axis
+			   .yAxisLabel('yAxisLabel') // (optional) render a vertical axis lable left of the y axis			   
+			   .renderHorizontalGridLines(true)
+			   .renderVerticalGridLines(true);	
+			
+
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

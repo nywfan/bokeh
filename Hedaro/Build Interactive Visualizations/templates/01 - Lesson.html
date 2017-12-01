@@ -1,0 +1,74 @@
+{% extends "template.html" %}
+{% block content %}
+	
+
+
+<!-- A div anchor that can be identified by id -->
+<div id="rowchart" class="dc-chart">
+	<!-- Title or anything you want to add above the chart -->
+	<strong>Row Chart</strong>
+	<!--
+		This will create a reset button when ever the user selects a filter.
+		Clicking on the reset button will remove all filters.
+	 -->
+	<a class="reset" href="javascript:RowChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+	<!--
+		dc.js will also automatically inject applied current filter value into
+		any html element with css class set to "filter"
+	-->
+	<span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var RowChart = dc.rowChart("#rowchart");
+
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+
+// Create function
+function Graph(data) {
+		
+   
+    // Make a crossfilter object  
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//define a dimension
+	//Here we will group by type
+	dim = ndx.dimension(function(d) {return d.type});
+
+	//Here we group by type and sum on column legs
+	g = dim.group().reduceSum(function(d){return d.legs;});
+
+	//Lets create a row chart
+	RowChart.dimension(dim)
+	    	.group(g)
+		    .width(500);
+
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

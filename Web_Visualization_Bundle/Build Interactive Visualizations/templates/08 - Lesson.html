@@ -1,0 +1,175 @@
+{% extends "template.html" %}
+{% block content %}
+	
+
+<!-- A div anchor that can be identified by id -->
+<div id="rowchart" class="dc-chart">
+    <!-- Title or anything you want to add above the chart -->
+    <strong>Row Chart</strong>
+    <!--
+        This will create a reset button when ever the user selects a filter.
+		Clicking on the reset button will remove all filters.
+     -->
+    <a class="reset" href="javascript:RowChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+    <!--
+        dc.js will also automatically inject applied current filter value into
+        any html element with css class set to "filter"
+    -->
+    <span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+<div id="piechart" class="dc-chart">
+    <strong>Pie Chart</strong>
+    <a class="reset" href="javascript:PieChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+    <span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+<div id="linechart" class="dc-chart">
+    <strong>Line Chart</strong>
+    <a class="reset" href="javascript:LineChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+    <span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+<div id="bubblechart" class="dc-chart">
+    <strong>Bubble Chart</strong>
+    <a class="reset" href="javascript:BubbleChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+    <span class="reset" style="display: none;">Current filter: <span class="filter"></span></span>
+	<br>
+	</br>
+</div>
+
+
+
+<script type="text/javascript">
+
+		// Create Global Variables
+		var dataset;
+		var RowChart = dc.rowChart("#rowchart");
+		var PieChart = dc.pieChart("#piechart");
+		var LineChart = dc.lineChart("#linechart");
+		var BubbleChart = dc.bubbleChart("#bubblechart");
+
+		// Load csv file
+		d3.csv("{{ static_url('data/data.csv') }}", function(data) {
+		
+			// Format columns
+            data.forEach(function (e) {
+				// convert from string to int
+                e.hp = +e.hp;
+                e.legs = +e.legs;
+            });	
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+
+// Create function
+function Graph(data) {
+		
+   
+    // Feed it through crossfilter   
+	var ndx = crossfilter(data);
+	console.log(data);
+	
+	//group it
+	var all = ndx.groupAll();
+	
+	//define dimensions
+	dim = ndx.dimension(function(d) {return d.type});
+	dim2 = ndx.dimension(function(d) {return d.name});
+	dimHP = ndx.dimension(function(d) {return d.hp});
+	dimHP2 = ndx.dimension(function(d) {return d.hp});	
+
+	//define groups
+	g = dim.group().reduceSum(function(d){return d.legs;});
+	g2 = dim2.group().reduceSum(function(d){return d.legs;});	
+	gHP = dimHP.group().reduceSum(function(d){return d.legs;});
+	gHP2 = dimHP2.group().reduce( 
+		//add
+		function(p,v) {
+			 ++p.count;
+			 p.sumIndex +=v.legs;
+			 p.avgIndex=p.sumIndex/p.count;
+			  return p;
+			},
+		//remove
+		function(p,v) {
+			--p.count; 
+			 p.sumIndex -=v.legs;
+			 p.avgIndex=p.sumIndex/p.count;
+			return p;
+			},
+		//init
+		function() {
+			return {count:0, sumIndex:0, 
+				avgIndex:0 };
+		}
+
+			);
+
+	//Lets create a row chart
+	RowChart.dimension(dim)
+	    	.group(g)
+			.elasticX(true) // rescale axis to fit data
+		    .width(500);
+			
+	//Lets create a pie chart
+	PieChart.dimension(dim2)
+			.radius(90)
+			.innerRadius(45)
+			.group(g2)
+			.title(function(d){ return d.data.key +": "+d.value;})
+			.renderTitle(true);	
+			
+	//max between numbers
+	var x1 = gHP.top(1)[0].value;
+	var x2 = d3.max(gHP.all(), function(d) { return +d.key; }); // had to convert string into int
+	var xmax = Math.max(x1, x2);
+
+	//Lets create a line chart
+	LineChart.dimension(dimHP)
+			 .group(gHP)
+			 .width(800)
+			 .height(200)
+			 .x(d3.scale.linear().domain([0,xmax]).range([0,17]))
+			 .renderHorizontalGridLines(true);
+			 
+	//Lets create a bubble chart
+	BubbleChart.dimension(dimHP2)
+			   .width(500)
+			   .height(200)
+			   .group(gHP2)
+			   .valueAccessor(function(p) {return p.value.sumIndex;})
+			   .radiusValueAccessor(function(p) {return p.value.sumIndex;})
+			   .x(d3.scale.linear().domain([0,15]).range([0,15]))
+			   .y(d3.scale.linear().domain([0,15]).range([0,15]))	
+			   .r(d3.scale.linear().domain([0, 4000]))
+			   .renderHorizontalGridLines(true)
+			   .renderVerticalGridLines(true);
+
+			
+	dc.renderAll(); // render all charts on the page
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

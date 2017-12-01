@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+
+<!-- import all of the needed libraries -->
+<!-- ********************************** -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> 
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<!--[if lt IE]>
+		<p>WARNING! You are using an outdated browser, Please use a modern browser like Chrome</p>
+	<![endif]-->
+
+    <title>{{ escape(main_title) }}</title>
+	<script type="text/javascript" src="{{ static_url('js/jquery-2.0.3.min.js') }}"></script>
+	<script type="text/javascript" src="{{ static_url('js/d3.min.js') }}"></script>	
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dataTables.bootstrap.css') }}"/>	
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/jquery.dataTables.js') }}"></script>	
+    <script type="text/javascript" src="{{ static_url('js/dataTables.bootstrap.js') }}"></script>
+
+	
+</head>
+
+<style>
+	.barz {
+	 fill: #428bca;
+	}
+	.axis {
+	 font: 10px sans-serif;
+	}
+	.axis path,
+	.axis line {
+	 fill: none;
+	 stroke: #000;
+	}
+	.x.axis path {
+	 display: none;
+	}
+</style>
+
+<body>
+<div class="container"> <!-- Adding this part centered everything on the screen nicely -->
+
+  <!-- Top section -->
+  <!-- *********** -->
+  {% block header %}   
+  <div class="container">
+	  <br></br>
+	  <center><div class="barz"> </div></center>
+	  <hr>
+
+  </div>
+  {% end block %} 
+
+
+
+	<!-- These are the other sections -->	
+	<!-- **************************** -->
+    <div> 
+    {% block content %} 
+    {% end block %} 
+    </div> 
+
+  <p></p> <!-- Add a tiny space between sections -->
+  <br></br>
+	
+	
+    <!-- Bottom menu -->
+	<!-- *********** -->
+    {% block menu %} 	
+	<nav class="navbar navbar-default" role="navigation">
+	  <!-- Brand and toggle get grouped for better mobile display -->
+	  <div class="navbar-header">
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+		  <span class="sr-only">Toggle navigation</span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		</button>
+		<a class="navbar-brand" href="/">pyRS</a>
+	  </div>
+	  <!-- Collect the nav links, forms, and other content for toggling -->
+	  <div class="collapse navbar-collapse navbar-ex1-collapse">
+		<ul class="nav navbar-nav">
+		  <li class="active"><a href="/">Home</a></li>
+	  
+		</ul>
+		</form>
+		<ul class="nav navbar-nav navbar-right">
+		  <li><a href="settings">Settings</a></li>
+		  <li><a href="faq">FAQ</a></li>
+		</ul>
+	  </div><!-- /.navbar-collapse -->
+	</nav>	
+    {% end block %} 
+    
+	<!-- Footer -->
+	<!-- ****** -->
+    {% block footer %} 	
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted credit">Site was created by <a href="http://www.hedaro.com" target="_blank">HEDARO</a> using <a href="http://getbootstrap.com/" target="_blank">Bootstrap</a> and <a href="http://www.tornadoweb.org/" target="_blank">Tornado</a>.
+		</p>
+      </div>
+    </div> 	
+    {% end block %} 	
+	
+</div>	<!-- end container div -->
+
+<script type="text/javascript">
+
+ var t = 1297110663, // start time (seconds since epoch)
+     v = 50, // start value (subscribers)
+     data = d3.range(12).map(next); // starting dataset
+  
+  function next() {
+    return {
+      time: ++t,
+      value: v = ~~Math.max(5, Math.min(90, v + 50 * (Math.random() - .5)))
+    };
+ }
+ 
+var w = 20,
+    h = 80;
+
+var x = d3.scale.linear()
+    .domain([0, 1])
+    .range([0, w]);
+
+var y = d3.scale.linear()
+    .domain([0, 100])
+    .rangeRound([0, h]); 
+ 
+var chart = d3.select(".barz")
+  .append("svg:svg")
+    .attr("class", "chart")
+    .attr("width", w * data.length - 1)
+    .attr("height", h);
+
+chart.selectAll("rect")
+    .data(data)
+  .enter().append("svg:rect")
+    .attr("x", function(d, i) { return x(i) - .5; })
+    .attr("y", function(d) { return h - y(d.value) - .5; })
+    .attr("width", w)
+    .attr("opacity", 0.7)
+    .attr("height", function(d) { return y(d.value); });
+
+chart.append("svg:line")
+    .attr("x1", 0)
+    .attr("x2", w * data.length)
+    .attr("y1", h - .5)
+    .attr("y2", h - .5)
+    .attr("stroke", "#000"); 
+	
+chart.append("svg:text")
+    .attr("x", w)
+    .attr("y", h - 20)
+	.attr("font-size", "80px")
+    .attr("stroke", "#000")
+    .attr("opacity", 0.8)
+	.attr("fill", "black")
+    .text("pyRS");
+ 
+redraw();
+
+function redraw() {
+
+  chart.selectAll("rect")
+      .data(data)
+    .transition()
+      .duration(1000)
+      .attr("y", function(d) { return h - y(d.value) - .5; })
+      .attr("height", function(d) { return y(d.value); });
+
+} 
+
+setInterval(function() {
+  data.shift();
+  data.push(next());
+  redraw();
+}, 6000);
+
+</script>
+
+</body>
+</html>

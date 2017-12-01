@@ -1,0 +1,222 @@
+{% extends "template.html" %}
+{% block content %}
+
+<!-- This is the bill summary section html code -->
+<div id="Summary" class="well">
+
+	<div class="row-fluid">
+	  <div class="col-xs-12 col-xs-offset-1 col-sm-12 col-sm-offset-1 col-md-12 col-md-offset-1 col-lg-12 col-lg-offset-1">
+		  <h2><strong>Bill Summary</strong></h2>
+	   </div>
+	</div>
+
+	<div style="font-size:20px" class="row-fluid">
+		<div id="one" class="col-xs-5 col-xs-offset-2 col-sm-5 col-sm-offset-2 col-md-5 col-md-offset-2 col-lg-5 col-lg-offset-2"></div>
+		<div id="two"></div>
+	</div>
+
+	<div style="font-size:20px" class="row-fluid">
+		<div id="three" class="col-xs-12 col-xs-offset-2 col-sm-12 col-sm-offset-2 col-md-12 col-md-offset-2 col-lg-12 col-lg-offset-2"></div>
+	</div>
+
+	<br></br>
+</div>
+
+
+<!-- A div anchor that can be identified by id -->
+<div id="barchart" class="dc-chart resize">
+
+	<!-- Title or anything you want to add above the chart -->
+	<strong>Current filter:</strong>
+	<!--
+		This will create a reset button when ever the user selects a filter.
+		Clicking on the reset button will remove all filters.
+	 -->
+	<a class="reset" href="javascript:BarChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	<div class="clearfix"></div>
+	<!--
+		dc.js will also automatically inject applied current filter value into
+		any html element with css class set to "filter"
+	-->
+	<span class="reset" style="display: none;"><span class="filter"></span></span>
+	<br></br>
+
+</div>
+
+<!-- anchor div for data table -->
+<table class="table table-hover dc-data-table">
+    <thead>
+        <tr class='header'>
+            <th>Date</th>
+            <th>Task</th>
+            <th>Hours</th>
+            <th>Rate</th>
+         </tr>
+    </thead>
+</table>
+
+
+<script type="text/javascript">
+
+
+
+		// Create Global Variables
+		var dataset;
+        var BarChart = dc.barChart("#barchart");
+        var DataTable = dc.dataTable(".dc-data-table");
+		var dateFormat = d3.time.format("%m/%d/%Y");
+		var numberFormat = d3.format("0,000");
+		
+		
+		// Load csv file
+		d3.csv("{{ static_url('data/InvoiceHistory.csv') }}", function(data) {
+		
+			// since its a csv file we need to format the data a bit
+            data.forEach(function (e) {
+                e.date = dateFormat.parse(e.date);
+				e.hours = +e.hours;
+				e.rate = +e.rate;
+            });
+		
+			dataset = data;
+
+			// Call function
+			Graph(dataset);
+			
+		});
+		
+
+// Create function
+function Graph(data) {
+		
+    // Feed the data through crossfilter   
+	var ndx = crossfilter(data);
+	var all = ndx.groupAll();
+	
+	// testing
+	//console.log(data);
+	
+	//define a dimension
+	dim = ndx.dimension(function(d) {return d.date});
+	
+	//define a group	
+	g = dim.group();
+
+	
+
+	// Function to update the Summary section 
+	function UpdateSummary() {
+
+		// If the filter has selected any data, calculate variables
+	    if (dim.top(1).length > 0) {
+	        sum = ndx.groupAll().reduceSum(function (p) { return p.hours; }).value();
+	        rate = dim.top(1)[0].rate;
+	        total = ndx.groupAll().reduceSum(function (p) { return p.hours * p.rate; }).value();
+	    }
+		
+		// Default to zero when the filter returns an empty result set
+	    else {
+	        sum = 0;
+	        total = 0;
+	        rate = 0;
+	    }
+        
+		// Brush filter info
+		//console.log(BarChart.brush().extent());
+
+		// update text
+		d3.select("#one")
+		  .attr("font-size", 200)
+		  .style("opacity", 0.5)
+		  .transition().delay(500)
+		  .text("Total Hours: " + numberFormat(sum))
+		  .transition().delay(500)
+		  .style("opacity", 1);
+
+		d3.select("#two")
+		  .style("opacity", 0.5)
+		  .transition().delay(500)
+		  .text("Total Due: $" + numberFormat(d3.round(total,2)))
+		  .transition().delay(500)
+		  .style("opacity", 1);
+
+		d3.select("#three")
+		  .style("opacity", 0.5)
+		  .transition().delay(500)
+		  .text("Rate: $" + rate)
+		  .transition().delay(500)
+		  .style("opacity", 1);		  
+
+	}; // end UpdateSummary
+
+	
+	// Create plot ranges
+	var xrange = new d3.extent(data, function(d) { return d.date; });
+	var PlotRange = [d3.time.day.offset(xrange[0], -1), d3.time.day.offset(xrange[1], 1)];
+	
+	// variables
+	var w = 1000,
+		h = 100;	
+	
+	//Lets create a bar chart
+	BarChart.width(w)
+            .height(h)
+            .margins({ top: 10, right: 50, bottom: 30, left: 60 })
+            .dimension(dim)
+            .group(g)
+            .centerBar(true)
+			.xUnits(d3.time.days)
+			.round(d3.time.days.round)
+            .x(d3.time.scale().domain(PlotRange))
+            .renderHorizontalGridLines(true);
+
+	BarChart.on("postRender", function (chart) {	
+	
+		// This makes the chart responsive
+		chart.select("svg")
+			.attr("viewBox", "0 0 " + w + " " + h)
+			.attr("preserveAspectRatio", "xMinYMin")
+			.attr("width", "100%")
+			.attr("height", "100%");
+		chart.redraw();
+				
+	});	
+	
+	BarChart.renderlet(function(chart){
+	
+		// This part removes the y axis labels
+		chart.select("g.y").style("display", "none");
+		
+		// This allows us to update the text in the summary section
+		UpdateSummary(chart);
+		
+	});	
+                               				
+	//Lets create a datatable		
+    DataTable.dimension(dim)
+	    .group(function(d) {
+			return "";
+		})
+		.size(500) // max rows to show
+		.columns([
+			function(d) { return dateFormat(d.date); },
+			function(d) { return d.task; },
+			function(d) { return d.hours; },
+			function(d) { return d.rate; }
+		])
+		.sortBy(function(d){ return d.date; })
+		.order(d3.ascending);
+			
+
+	dc.renderAll();
+
+
+}; // end graph function			
+	
+		
+    </script>
+	
+{% end block %}
+
+	
+

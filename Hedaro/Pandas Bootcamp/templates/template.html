@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<!-- import all of the needed libraries -->
+<!-- ********************************** -->
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"> 
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	
+	<!--[if lt IE]>
+		<p>WARNING! You are using an outdated browser, Please use a modern browser like Chrome</p>
+	<![endif]-->
+
+    <title>{{ escape(main_title) }}</title>
+	<script type="text/javascript" src="{{ static_url('js/jquery-2.0.3.min.js') }}"></script> <!-- bootstrap 3 requires jquery -->  
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/bootstrap.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dataTables.bootstrap.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ static_url('css/dataTables.tableTools.css') }}"/>		
+    <script type="text/javascript" src="{{ static_url('js/bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/jquery.dataTables.js') }}"></script>	
+    <script type="text/javascript" src="{{ static_url('js/dataTables.bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ static_url('js/dataTables.tableTools.js') }}"></script>		
+
+	
+</head>
+
+<body>
+<div class="container"> <!-- Adding this part centered everything on the screen nicely -->
+
+  <!-- Top section -->
+  <!-- *********** -->
+  {% block header %}   
+  <div class="container">
+	  <div class="featurette-heading" style="font-size:45px"><strong><center>Pandas Bootcamp</center></strong></div>
+	  <hr>
+
+  </div>
+  {% end block %} 
+
+
+
+	<!-- These are the other sections -->	
+	<!-- **************************** -->
+    <div> 
+    {% block content %} 
+    {% end block %} 
+    </div> 
+
+  <p></p> <!-- Add a tiny space between sections -->
+  <br></br>
+	
+	
+    <!-- Bottom menu -->
+	<!-- *********** -->
+    {% block menu %} 	
+	<nav class="navbar navbar-default" role="navigation">
+	  <!-- Brand and toggle get grouped for better mobile display -->
+	  <div class="navbar-header">
+		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+		  <span class="sr-only">Toggle navigation</span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		  <span class="icon-bar"></span>
+		</button>
+		<a class="navbar-brand" href="/">Bootcamp</a>
+	  </div>
+	  <!-- Collect the nav links, forms, and other content for toggling -->
+	  <div class="collapse navbar-collapse navbar-ex1-collapse">
+		<ul class="nav navbar-nav">
+		  <li class="active"><a href="/">Home</a></li>
+		  <li><a href="https://squareup.com/market/david-rojas-llc">Online Store</a></li>
+		</ul>
+		</form>
+		<ul class="nav navbar-nav navbar-right">
+		  <li><a href="faq">FAQ</a></li>
+		</ul>
+	  </div><!-- /.navbar-collapse -->
+	</nav>	
+    {% end block %} 
+    
+	<!-- Footer -->
+	<!-- ****** -->
+    {% block footer %} 	
+    <div id="footer">
+      <div class="container">
+        <p class="text-muted credit">Site was created by <a href="http://www.hedaro.com/">HEDARO</a> using <a href="http://getbootstrap.com/">Bootstrap</a> and <a href="http://www.tornadoweb.org/">Tornado</a>.
+		</p>
+      </div>
+    </div> 	
+    {% end block %} 	
+	
+</div>	<!-- end container div -->
+
+
+
+</body>
+</html>

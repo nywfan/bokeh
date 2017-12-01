@@ -1,0 +1,40 @@
+{% extends "template.html" %}
+{% block content %}
+    <div class="container">
+    	<br/>
+        <br/>
+        <br/>
+        <h2>Welcome to Tornado</h2>
+		<br/>
+        <!--Apply css to all tables-->
+        <div class="table table-hover table-striped">
+            
+            <!--Place two tables side by side-->
+            <div class="row">
+                <div class="span6">{% raw tbl %}</div>
+                <div class="span4">{% raw tbl %}</div>
+            </div>
+
+            <!--Add a little sace between the tables-->
+            <br/>
+            <br/>
+            <br/>
+
+            <!--Place two tables side by side-->
+            <div class="row">
+                <div class="span6">{% raw tbl %}</div>
+                <div class="span4">{% raw tbl %}</div>
+            </div>
+          
+        </div>
+
+	</div>
+
+{% end block %}
+
+
+	
+	
+	
+// {% autoescape None %} if you put this at the top, it will affect everything
+// {% raw *expression* %} does not escape the expression
